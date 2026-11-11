@@ -20,7 +20,9 @@ Environment=JAM_MAX_PARTIES=200
 Environment=JAM_CREATE_RATE_PER_MINUTE=2
 Environment=JAM_CONNECTION_IDLE_MS=900000
 # Browser origins the web player runs on (no wildcards; see config.IsAllowedOrigin).
-Environment=JAM_ALLOWED_ORIGINS=https://bitchord.in,https://bitchord-8bw.pages.dev,http://localhost:5173
+# tauri.localhost is the desktop app's WebView2 origin; the native Android app
+# sends no Origin and needs no entry.
+Environment=JAM_ALLOWED_ORIGINS=https://bitchord.in,https://bitchord-8bw.pages.dev,http://localhost:5173,http://tauri.localhost,tauri://localhost
 
 NoNewPrivileges=true
 ProtectSystem=strict

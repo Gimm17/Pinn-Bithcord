@@ -150,20 +150,30 @@ async function sha256(value: string): Promise<string> {
 }
 
 /**
- * Who this device jams as: the YouTube Music account it's signed in with
- * (prompt §8; the phone requires a signed-in account too). The id is a hash of
- * the login and channel, never either of them.
+ * Who this device jams as: the YouTube Music account it's signed in with, or —
+ * where there is no sign-in (the desktop) — the device itself. The id is a
+ * hash, never the login or the raw device id.
  */
 async function identity(): Promise<Omit<JoinRequest, 'maxMembers' | 'autoplayEnabled'>> {
   const auth = ytAuthSnapshot();
   const active = auth.signedIn ? auth.active : null;
-  if (!active) throw new PartyError('not_signed_in', 'Sign in to YouTube Music to listen together.');
-  const name = partySettings().nickname.trim() || active.name;
+  const device = deviceId();
+  const name = partySettings().nickname.trim() || active?.name || 'BitChord Desktop';
+  if (active) {
+    return {
+      userId: (await sha256(`${active.authUser}:${active.id}`)).slice(0, 32),
+      deviceId: device,
+      displayName: name,
+      avatarUrl: active.avatarUrl?.startsWith('http') ? active.avatarUrl : null,
+    };
+  }
+  // Desktop has no YouTube Music sign-in (bridge_auth_state -> signed_in:false);
+  // the server accepts any non-empty userId/displayName, so identify by device.
   return {
-    userId: (await sha256(`${active.authUser}:${active.id}`)).slice(0, 32),
-    deviceId: deviceId(),
+    userId: (await sha256(device)).slice(0, 32),
+    deviceId: device,
     displayName: name,
-    avatarUrl: active.avatarUrl?.startsWith('http') ? active.avatarUrl : null,
+    avatarUrl: null,
   };
 }
 
