@@ -965,6 +965,9 @@
     <string name="listen_together_you">나</string>
     <string name="listen_together_host">호스트</string>
     <string name="listen_together_away">자리 비움 — 자리는 유지됩니다</string>
+    <string name="listen_together_volume_not_set">음량 · 이 기기 자체의 수준</string>
+    <string name="listen_together_volume_set">음량 · %1$d%%</string>
+    <string name="listen_together_volume_clear">재설정</string>
     <string name="listen_together_landing_title">파티 시작</string>
     <string name="listen_together_landing_subtitle">음악은 함께 들으면 더 즐겁습니다. 친구들이 어디 있든, 초대해 실시간으로 곡을 같이 듣고 추가하세요.</string>
     <string name="listen_together_create_action">파티 생성</string>
@@ -1307,4 +1310,11 @@
     <string name="bit_perfect_status_inexact">%1$s · 정확하지 않음: 이 소스는 무손실 PCM이 아닙니다</string>
     <string name="bit_perfect_status_waiting">지원되는 출력에서 무손실 트랙을 기다리는 중</string>
     <string name="bit_perfect_status_unavailable">이 트랙에서 사용할 수 없음(%1$s)</string>
+    <string name="automix_overview">오토믹스 개요</string>
+    <string name="diwali_title">BitChord가 디왈리를 축하합니다</string>
+    <string name="diwali_subtitle">빛의 축제가 당신의 집을 기쁨으로, 하루하루를 음악으로 가득 채우길 바랍니다.</string>
+    <string name="diwali_cta">함께 축하해요</string>
+    <string name="listen_together_this_device">이 기기</string>
+    <string name="listen_together_play_on_device">이 기기에서 재생</string>
+    <string name="listen_together_play_on_device_subtitle">이 기기만의 음소거입니다. 끄면 파티의 모든 조작을 그대로 따르면서도 소리는 나지 않으며, 다른 사람에게는 아무것도 전달되지 않습니다.</string>
 </resources>

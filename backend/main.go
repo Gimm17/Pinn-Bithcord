@@ -993,7 +993,8 @@ func handleSocketFrame(p *party.Party, member *party.Member, sc *hub.SafeConn, f
 			hubInst.Broadcast(p.Code, stateFrame(p), "")
 			if action == protocol.ActionKick ||
 				action == protocol.ActionSetMaxMembers ||
-				action == protocol.ActionSetHostOnlyControl {
+				action == protocol.ActionSetHostOnlyControl ||
+				action == protocol.ActionSetMemberVolume {
 				hubInst.Broadcast(p.Code, membersFrame(p), "")
 			}
 			hubInst.Broadcast(p.Code, activityFrame(member, action, frame), "")
@@ -1181,6 +1182,29 @@ func applyControl(p *party.Party, member *party.Member, action string, frame map
 		}
 		return true, "", ""
 
+	case protocol.ActionSetMemberVolume:
+		targetID, _ := frame["memberId"].(string)
+		if targetID == "" {
+			return false, "invalid_member", "Choose a listener to set the volume for."
+		}
+		// Absent means "hand the level back to that device", which is a real
+		// instruction and not a malformed one — so only a value that is
+		// present and not a number is refused.
+		var percent *int
+		if raw, present := frame["percent"]; present && raw != nil {
+			value, ok := raw.(float64)
+			if !ok {
+				return false, "invalid_volume", "Volume must be between 0 and 100."
+			}
+			pct := int(value)
+			percent = &pct
+		}
+		if err := p.SetMemberVolume(member, targetID, percent); err != nil {
+			pe := err.(*party.PartyError)
+			return false, pe.Code, pe.Message
+		}
+		return true, "", ""
+
 	case protocol.ActionKick:
 		targetID, _ := frame["memberId"].(string)
 		if !member.IsHost { return false, "host_only", "Only the host can remove listeners." }
@@ -1237,6 +1261,12 @@ func activityFrame(member *party.Member, action string, frame map[string]interfa
 	case protocol.ActionPause: detail = "Paused playback"
 	case protocol.ActionSeek: detail = "Changed the playback position"
 	case protocol.ActionKick: detail = "Removed a listener from the party"
+	case protocol.ActionSetMemberVolume:
+		if percent, ok := frame["percent"].(float64); ok {
+			detail = fmt.Sprintf("Set a listener's volume to %d%%", int(percent))
+		} else {
+			detail = "Handed a listener's volume back to their device"
+		}
 	case protocol.ActionSetMaxMembers: detail = "Changed the party size"
 	case protocol.ActionSetAutoplay: detail = "Changed AutoPlay"
 	}

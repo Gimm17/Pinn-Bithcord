@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ServerClock } from './clock';
 import { cleanCode, inviteUrl, parseInvite } from './invite';
-import { EMPTY_PLAYBACK, type PartyMember, type PartyQueue, type PartyTrack } from './models';
+import { EMPTY_PLAYBACK, memberOf, type PartyMember, type PartyQueue, type PartyTrack } from './models';
 import { autoplaySupplierId, detectSingleMove, partyQueueIndexOf, partyUpcomingAfter } from './queueReading';
 
 // ServerClockTest.kt, case for case.
@@ -99,6 +99,7 @@ describe('AutoPlay supplier', () => {
     connected,
     joinedAtMs: 0,
     lastSeenMs: 0,
+    volumePercent: null,
   });
 
   it('is the host while connected, else the lowest connected member', () => {
@@ -122,5 +123,27 @@ describe('invites', () => {
   it('links to a custom server’s own invite page', () => {
     expect(inviteUrl('ab12cd', null)).toBe('https://bitchord.kushagrasingh.in/invite/AB12CD');
     expect(inviteUrl('AB12CD', 'https://jam.example.com/')).toBe('https://jam.example.com/invite/AB12CD');
+  });
+});
+
+// The host's volume, as each client reads it. The distinction these guard is
+// the one the server keeps: null is "nobody set this", 0 is "silence this".
+describe('Member volume on the wire', () => {
+  it('reads an unset level as null, not as zero', () => {
+    expect(memberOf({ memberId: 'a' }).volumePercent).toBeNull();
+  });
+
+  it('keeps a silence the host asked for', () => {
+    expect(memberOf({ memberId: 'a', volumePercent: 0 }).volumePercent).toBe(0);
+  });
+
+  it('keeps a level the host set', () => {
+    expect(memberOf({ memberId: 'a', volumePercent: 35 }).volumePercent).toBe(35);
+  });
+
+  it('refuses to coerce something that is not a number', () => {
+    // A string "0" would survive Number() and become silence nobody asked for.
+    expect(memberOf({ memberId: 'a', volumePercent: '0' as unknown as number }).volumePercent).toBeNull();
+    expect(memberOf({ memberId: 'a', volumePercent: true as unknown as number }).volumePercent).toBeNull();
   });
 });

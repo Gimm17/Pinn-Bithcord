@@ -298,6 +298,12 @@ class PrecisionAudioSink(
         encodedAccessUnitCount: Int,
     ): Boolean {
         if (!isPrecisionActive) {
+            // A compressed bitstream is deliberately not silenced here: zeroing
+            // an AC-3 or offload payload does not produce quiet, it produces a
+            // frame the decoder cannot parse. Nothing in this app configures
+            // passthrough or offload output, so this branch is not a way a
+            // party could be heard from a device that was told to be quiet —
+            // and the switch is applied to every decoded path in [DspChain].
             return delegate.handleBuffer(inputBuffer, presentationTimeUs, encodedAccessUnitCount)
         }
 

@@ -1087,6 +1087,9 @@
     <string name="listen_together_host">Host</string>
 
     <string name="listen_together_away">Away — their slot is held</string>
+    <string name="listen_together_volume_not_set">Âm lượng · mức riêng của thiết bị này</string>
+    <string name="listen_together_volume_set">Âm lượng · %1$d%%</string>
+    <string name="listen_together_volume_clear">Đặt lại</string>
 
     <string name="listen_together_create_action">Tạo bữa tiệc</string>
     <string name="listen_together_create_sheet_subtitle">Chọn cách bạn xuất hiện và số người có thể tham gia.</string>
@@ -1374,4 +1377,11 @@
     <string name="bit_perfect_status_inexact">%1$s · không chính xác: nguồn này không phải PCM lossless</string>
     <string name="bit_perfect_status_waiting">Đang chờ bản nhạc lossless trên đầu ra được hỗ trợ</string>
     <string name="bit_perfect_status_unavailable">Không khả dụng cho bản nhạc này (%1$s)</string>
+    <string name="automix_overview">Tổng quan Automix</string>
+    <string name="diwali_title">BitChord chúc bạn một mùa Diwali vui vẻ</string>
+    <string name="diwali_subtitle">Mong lễ hội ánh sáng này mang niềm vui đến ngôi nhà bạn và âm nhạc đến những ngày của bạn.</string>
+    <string name="diwali_cta">Cùng ăn mừng</string>
+    <string name="listen_together_this_device">Thiết bị này</string>
+    <string name="listen_together_play_on_device">Phát trên thiết bị này</string>
+    <string name="listen_together_play_on_device_subtitle">Chế độ tắt tiếng riêng của thiết bị này. Khi tắt, máy vẫn im lặng mà vẫn tuân theo mọi điều khiển trong bữa tiệc; những người khác không nghe thấy gì về chuyện đó.</string>
 </resources>

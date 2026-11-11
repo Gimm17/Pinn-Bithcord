@@ -25,6 +25,12 @@ export interface PartyMember {
   connected: boolean;
   joinedAtMs: number;
   lastSeenMs: number;
+  /**
+   * The level the host set for this device, 0–100, or null when nobody has set
+   * one. Null and 0 are different instructions: null leaves this device's own
+   * volume alone, 0 is the host silencing it.
+   */
+  volumePercent: number | null;
 }
 
 /**
@@ -150,6 +156,10 @@ export function memberOf(raw: Partial<PartyMember>): PartyMember {
     connected: raw.connected ?? false,
     joinedAtMs: raw.joinedAtMs ?? 0,
     lastSeenMs: raw.lastSeenMs ?? 0,
+    // Absent on the wire means "not set", never "silent". Number() on a
+    // boolean or a string would quietly turn 0 into 1, so the type is checked
+    // rather than coerced.
+    volumePercent: typeof raw.volumePercent === 'number' ? raw.volumePercent : null,
   };
 }
 

@@ -705,6 +705,9 @@
     <string name="listen_together_you">あなた</string>
     <string name="listen_together_host">ホスト</string>
     <string name="listen_together_away">離席中 — 枠は確保されています</string>
+    <string name="listen_together_volume_not_set">音量 · このデバイス自身のレベル</string>
+    <string name="listen_together_volume_set">音量 · %1$d%%</string>
+    <string name="listen_together_volume_clear">リセット</string>
     <string name="listen_together_landing_title">パーティーを始める</string>
     <string name="listen_together_landing_subtitle">音楽はみんなで聴くともっと楽しい。友だちを招待して、どこにいてもリアルタイムで一緒に聴いたり曲を追加したりできます。</string>
     <string name="listen_together_create_action">パーティーを作成</string>
@@ -1435,4 +1438,11 @@
     <string name="bit_perfect_status_inexact">%1$s · 正確ではありません： このソースはロスレス PCM ではありません</string>
     <string name="bit_perfect_status_waiting">対応する出力でロスレスのトラックを待っています</string>
     <string name="bit_perfect_status_unavailable">このトラックでは利用できません（%1$s）</string>
+    <string name="automix_overview">オートミックスの概要</string>
+    <string name="diwali_title">BitChord よりディワリのお祝いを申し上げます</string>
+    <string name="diwali_subtitle">この光の祭りが、あなたの家を喜びで、日々を音楽で満たしますように。</string>
+    <string name="diwali_cta">お祝いしましょう</string>
+    <string name="listen_together_this_device">このデバイス</string>
+    <string name="listen_together_play_on_device">このデバイスで再生</string>
+    <string name="listen_together_play_on_device_subtitle">このデバイスだけのミュートです。オフでもパーティーのすべての操作に従いつつ、このデバイスは音を出しません。他の人には何も伝わりません。</string>
 </resources>

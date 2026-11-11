@@ -772,6 +772,9 @@
     <string name="listen_together_you">Sen</string>
     <string name="listen_together_host">Kurucu</string>
     <string name="listen_together_away">Uzakta — yeri tutuluyor</string>
+    <string name="listen_together_volume_not_set">Ses düzeyi · bu cihazın kendi seviyesi</string>
+    <string name="listen_together_volume_set">Ses düzeyi · %1$d%%</string>
+    <string name="listen_together_volume_clear">Sıfırla</string>
     <string name="listen_together_landing_title">Parti başlat</string>
     <string name="listen_together_landing_subtitle">Çünkü müzik birlikte daha güzel. Arkadaşlarını nerede olurlarsa olsunlar birlikte dinlemeye ve gerçek zamanlı şarkı eklemeye davet et.</string>
     <string name="listen_together_create_action">Parti oluştur</string>
@@ -1414,4 +1417,11 @@
     <string name="bit_perfect_status_inexact">%1$s · tam değil: bu kaynak kayıpsız PCM değil</string>
     <string name="bit_perfect_status_waiting">Desteklenen bir çıkışta kayıpsız parça bekleniyor</string>
     <string name="bit_perfect_status_unavailable">Bu parça için kullanılamıyor (%1$s)</string>
+    <string name="automix_overview">Automix genel bakış</string>
+    <string name="diwali_title">BitChord mutlu Diwali diler</string>
+    <string name="diwali_subtitle">Bu ışık festivali evini neşeyle, günlerini müzikle doldursun.</string>
+    <string name="diwali_cta">Hadi kutlayalım</string>
+    <string name="listen_together_this_device">Bu cihaz</string>
+    <string name="listen_together_play_on_device">Bu cihazda çal</string>
+    <string name="listen_together_play_on_device_subtitle">Bu cihazın kendi sessize alması. Kapalıyken sessiz kalır ama partideki her denetimi izlemeyi sürdürür; diğerleri bundan hiçbir şey duymaz.</string>
 </resources>

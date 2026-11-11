@@ -504,10 +504,17 @@ type Member struct {
 	ControlBudgetAtMs  int64   `json:"-"`
 	FrameBudget        float64 `json:"-"`
 	FrameBudgetAtMs    int64   `json:"-"`
+	// VolumePercent is the level the host has set for this device, 0–100, or
+	// nil when the host has not set one — which is not the same as 0.
+	//
+	// It travels on the members frame rather than the state frame for the same
+	// reason HostOnlyControl does: it changes only when the host moves a
+	// slider, and the state frame is re-sent to everyone every few seconds.
+	VolumePercent *int `json:"volumePercent,omitempty"`
 }
 
 func (m *Member) ToWire() map[string]interface{} {
-	return map[string]interface{}{
+	wire := map[string]interface{}{
 		"memberId":    m.MemberId,
 		"userId":      m.UserId,
 		"displayName": m.DisplayName,
@@ -517,6 +524,12 @@ func (m *Member) ToWire() map[string]interface{} {
 		"joinedAtMs":  m.JoinedAtMs,
 		"lastSeenMs":  m.LastSeenMs,
 	}
+	// Omitted rather than sent as null, so a client can keep the distinction
+	// between "the host set this device to 0%" and "the host never touched it".
+	if m.VolumePercent != nil {
+		wire["volumePercent"] = *m.VolumePercent
+	}
+	return wire
 }
 
 // Party holds members and playback state for a single room code.
@@ -653,6 +666,45 @@ func (p *Party) SetHostOnlyControl(member *Member, enabled bool) error {
 // that never touches the setting.
 func (p *Party) MayControl(member *Member) bool {
 	return !p.HostOnlyControl || member.IsHost
+}
+
+// SetMemberVolume sets how loud one listener's device should be, as a
+// percentage of that device's own music stream.
+//
+// Host-only without exception, and not part of the hostOnlyControl setting: a
+// host reaches into someone else's volume here, which is a different act from
+// driving the music everyone hears. A nil percent clears the setting, handing
+// the level back to the listener.
+func (p *Party) SetMemberVolume(member *Member, targetId string, percent *int) error {
+	if !member.IsHost {
+		return NewPartyError(403, "host_only", "Only the host can set a listener's volume.")
+	}
+	if percent != nil && (*percent < 0 || *percent > 100) {
+		return NewPartyError(422, "invalid_volume", "Volume must be between 0 and 100.")
+	}
+	target, ok := p.Members[targetId]
+	if !ok {
+		return NewPartyError(404, "not_found", "That listener is no longer in this party.")
+	}
+	// The host's own level is theirs to set on their own device. Accepting it
+	// here would make the party store a second opinion about the host's
+	// speakers, which nothing on the host's device would read.
+	if target.IsHost {
+		return NewPartyError(422, "invalid_member", "The host sets their own volume.")
+	}
+	if equalVolume(target.VolumePercent, percent) {
+		return nil
+	}
+	target.VolumePercent = percent
+	p.Touch()
+	return nil
+}
+
+func equalVolume(a, b *int) bool {
+	if a == nil || b == nil {
+		return a == nil && b == nil
+	}
+	return *a == *b
 }
 
 func (p *Party) Authenticate(token string) (*Member, error) {

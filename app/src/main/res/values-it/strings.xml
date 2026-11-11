@@ -790,6 +790,9 @@
     <string name="listen_together_you">Tu</string>
     <string name="listen_together_host">Host</string>
     <string name="listen_together_away">Assente — il posto è tenuto</string>
+    <string name="listen_together_volume_not_set">Volume · livello proprio di questo dispositivo</string>
+    <string name="listen_together_volume_set">Volume · %1$d%%</string>
+    <string name="listen_together_volume_clear">Reimposta</string>
     <string name="listen_together_landing_title">Avvia un party</string>
     <string name="listen_together_landing_subtitle">Perché la musica suona meglio in compagnia. Invita gli amici ad ascoltare e aggiungere brani in tempo reale, ovunque si trovino.</string>
     <string name="listen_together_create_action">Crea un party</string>
@@ -1396,4 +1399,11 @@
     <string name="bit_perfect_status_inexact">%1$s · non esatto: questa sorgente non è PCM lossless</string>
     <string name="bit_perfect_status_waiting">In attesa di un brano lossless su un\'uscita supportata</string>
     <string name="bit_perfect_status_unavailable">Non disponibile per questo brano (%1$s)</string>
+    <string name="automix_overview">Panoramica di Automix</string>
+    <string name="diwali_title">BitChord ti augura un felice Diwali</string>
+    <string name="diwali_subtitle">Che questa festa delle luci riempia la tua casa di gioia e le tue giornate di musica.</string>
+    <string name="diwali_cta">Festeggiamo</string>
+    <string name="listen_together_this_device">Questo dispositivo</string>
+    <string name="listen_together_play_on_device">Riproduci su questo dispositivo</string>
+    <string name="listen_together_play_on_device_subtitle">La disattivazione dell’audio di questo dispositivo. Spento lo tiene in silenzio mentre continua a seguire ogni comando della festa; gli altri non ne sentono nulla.</string>
 </resources>

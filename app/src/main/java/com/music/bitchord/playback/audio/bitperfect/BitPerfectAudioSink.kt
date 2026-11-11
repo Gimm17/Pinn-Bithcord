@@ -22,6 +22,7 @@ import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.common.util.Util
 import androidx.media3.exoplayer.audio.AudioSink
+import com.music.bitchord.playback.audio.PartyMute
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import kotlin.math.abs
@@ -546,6 +547,13 @@ internal class BitPerfectAudioSink(
     /** Writes what [active] takes of [buffer], keeping a copy in [recent] for a later [suspend]. */
     private fun handOver(active: BitPerfectTransport, buffer: ByteBuffer): Int {
         val start = buffer.position()
+        // The exclusive output carries the samples untouched, so the party's
+        // switch has to be applied here rather than in [DspChain], which this
+        // path never reaches. It is this sink's own output buffer, never the
+        // decoder's, and the stream still advances — timestamps, the playhead
+        // and the queue are exactly what they would be otherwise — so a device
+        // silenced here still skips and still seeks.
+        if (PartyMute.silenced) PartyMute.silence(buffer)
         val taken = active.write(buffer)
         if (taken > 0) {
             recent?.record(buffer, start, taken)

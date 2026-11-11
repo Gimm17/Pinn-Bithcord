@@ -375,6 +375,9 @@ export const party = {
   kick: (memberId: string) => control('kick', { memberId }),
   setAutoplay: (enabled: boolean) => control('setAutoplay', { enabled }),
   setHostOnlyControl: (enabled: boolean) => control('setHostOnlyControl', { enabled }),
+  /** Host only: the level one listener's device should play at, or null to hand it back. */
+  setMemberVolume: (memberId: string, percent: number | null) =>
+    control('setMemberVolume', { memberId, ...(percent === null ? {} : { percent }) }),
 };
 
 // ---- The playhead ------------------------------------------------------------------

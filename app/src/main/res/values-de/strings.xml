@@ -725,6 +725,9 @@
     <string name="listen_together_you">Du</string>
     <string name="listen_together_host">Host</string>
     <string name="listen_together_away">Abwesend – ihr Platz bleibt frei</string>
+    <string name="listen_together_volume_not_set">Lautstärke · eigenes Niveau dieses Geräts</string>
+    <string name="listen_together_volume_set">Lautstärke · %1$d%%</string>
+    <string name="listen_together_volume_clear">Zurücksetzen</string>
     <string name="listen_together_landing_title">Party starten</string>
     <string name="listen_together_landing_subtitle">Weil Musik zusammen besser klingt. Lade Freunde ein, gemeinsam zu hören und in Echtzeit Songs hinzuzufügen – egal, wo sie sind.</string>
     <string name="listen_together_create_action">Party erstellen</string>
@@ -1457,4 +1460,11 @@
     <string name="bit_perfect_status_inexact">%1$s · nicht exakt: Diese Quelle ist kein verlustfreies PCM</string>
     <string name="bit_perfect_status_waiting">Warte auf einen verlustfreien Titel an einem unterstützten Ausgang</string>
     <string name="bit_perfect_status_unavailable">Für diesen Titel nicht verfügbar (%1$s)</string>
+    <string name="automix_overview">Automix-Übersicht</string>
+    <string name="diwali_title">BitChord wünscht dir ein frohes Diwali</string>
+    <string name="diwali_subtitle">Möge dieses Fest des Lichts dein Zuhause mit Freude und deine Tage mit Musik füllen.</string>
+    <string name="diwali_cta">Lass uns feiern</string>
+    <string name="listen_together_this_device">Dieses Gerät</string>
+    <string name="listen_together_play_on_device">Auf diesem Gerät abspielen</string>
+    <string name="listen_together_play_on_device_subtitle">Die eigene Stummschaltung dieses Geräts. Aus hält es still, während es jeder Steuerung in der Party weiter folgt; die anderen hören davon nichts.</string>
 </resources>

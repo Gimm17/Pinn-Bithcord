@@ -1119,6 +1119,22 @@ object ListenTogether {
     fun setHostOnlyControl(enabled: Boolean) =
         control("setHostOnlyControl") { put("enabled", enabled) }
 
+    /**
+     * Sets how loud [memberId]'s device should be, 0–100, or null to hand the
+     * level back to that device. Host only.
+     *
+     * The level is applied by each recipient to its own music stream; this
+     * device sending it is all it can do about somebody else's speaker.
+     */
+    fun setMemberVolume(memberId: String, percent: Int?) =
+        control("setMemberVolume") {
+            put("memberId", memberId)
+            // Omission is the clear instruction, not a missing value. Writing
+            // an explicit null instead would leave that to the server's
+            // decoder, and the server treats the two the same only by choice.
+            if (percent != null) put("percent", percent)
+        }
+
     private fun control(action: String, body: kotlinx.serialization.json.JsonObjectBuilder.() -> Unit) {
         val frame = buildJsonObject {
             put("type", "control")
@@ -1331,6 +1347,10 @@ object ListenTogether {
                     connection = Connection.LIVE,
                     error = null,
                 ) }
+                // A device that arrives after the host set its level learns it
+                // from the snapshot and nowhere else — the members frame that
+                // carried it went out before this socket existed.
+                com.music.bitchord.playback.PartyVolume.apply()
             }
 
             "pong" -> {
@@ -1402,6 +1422,11 @@ object ListenTogether {
                             ?: current.you,
                     )
                 }
+                // This frame is the only thing that carries a level the host
+                // set for this device, so it is also the only place one can be
+                // applied. Cheap and idempotent: it returns immediately when
+                // there is no party, no level, or the level already in force.
+                com.music.bitchord.playback.PartyVolume.apply()
             }
 
             "activity" -> {

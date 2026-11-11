@@ -705,6 +705,9 @@
     <string name="listen_together_you">你</string>
     <string name="listen_together_host">主持人</string>
     <string name="listen_together_away">暂离 — 位置为其保留</string>
+    <string name="listen_together_volume_not_set">音量 · 此设备自己的音量</string>
+    <string name="listen_together_volume_set">音量 · %1$d%%</string>
+    <string name="listen_together_volume_clear">重置</string>
     <string name="listen_together_landing_title">开始派对</string>
     <string name="listen_together_landing_subtitle">因为一起听的音乐更动听。邀请朋友一起收听，并实时添加歌曲，无论他们身在何处。</string>
     <string name="listen_together_create_action">创建派对</string>
@@ -1434,4 +1437,11 @@
     <string name="bit_perfect_status_inexact">%1$s · 不精确：此音源不是无损 PCM</string>
     <string name="bit_perfect_status_waiting">正在等待受支持输出上的无损曲目</string>
     <string name="bit_perfect_status_unavailable">此曲目不可用（%1$s）</string>
+    <string name="automix_overview">自动混音概览</string>
+    <string name="diwali_title">BitChord 祝你排灯节快乐</string>
+    <string name="diwali_subtitle">愿这个光明之节点亮你的家，让喜悦与音乐充满你的每一天。</string>
+    <string name="diwali_cta">一起庆祝</string>
+    <string name="listen_together_this_device">此设备</string>
+    <string name="listen_together_play_on_device">在此设备上播放</string>
+    <string name="listen_together_play_on_device_subtitle">此设备自身的静音。关闭后它保持静音，但仍会跟随聚会中的每一项控制；其他人不会察觉。</string>
 </resources>

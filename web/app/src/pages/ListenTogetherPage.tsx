@@ -187,6 +187,53 @@ function InviteCard({ code, server, signedIn }: { code: string; server: string |
   );
 }
 
+/**
+ * The host's level for one listener's device.
+ *
+ * `percent === null` is a real state — nobody has set this device, so its own
+ * volume stands — and the row says so rather than showing 0, which would read
+ * as silence the host chose. While dragging, the value is local: a round trip
+ * cannot drive a thumb, and the party's copy takes over again on release.
+ */
+function MemberVolume({ percent, onSet }: { percent: number | null; onSet: (percent: number | null) => void }) {
+  const [drag, setDrag] = useState<number | null>(null);
+  const shown = drag ?? percent ?? 0;
+  return (
+    <div className="flex items-center gap-3 px-4 pb-2.5 ps-[52px]">
+      <input
+        type="range"
+        min={0}
+        max={100}
+        step={1}
+        value={shown}
+        // The party's number is the authority; when the host has set nothing
+        // the slider has no position that means anything, so it says so.
+        aria-label="Volume for this listener"
+        className="h-1 min-w-0 flex-1 accent-key"
+        onChange={(e) => setDrag(Number(e.currentTarget.value))}
+        onPointerUp={() => {
+          if (drag === null) return;
+          onSet(drag);
+          setDrag(null);
+        }}
+        onKeyUp={() => {
+          if (drag === null) return;
+          onSet(drag);
+          setDrag(null);
+        }}
+      />
+      <span className="w-24 flex-none type-callout text-secondary">
+        {percent === null ? 'Their own level' : `${shown}%`}
+      </span>
+      {percent !== null && (
+        <button className={settingsUi.inlineButton} onClick={() => onSet(null)} title="Hand the level back to their device">
+          Reset
+        </button>
+      )}
+    </div>
+  );
+}
+
 function Avatar({ name, url, large = false }: { name: string; url: string | null; large?: boolean }) {
   const className = `grid place-items-center rounded-full bg-quaternary object-cover type-callout-emphasized ${large ? 'size-9' : 'size-6'}`;
   return url ? (
@@ -200,6 +247,10 @@ function InParty() {
   const state = useParty();
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
+  // The player's own mute, not a party control: the party hears nothing of it,
+  // and the device keeps following every control while staying silent.
+  const muted = usePlayer((s) => s.muted);
+  const toggleMute = usePlayer((s) => s.toggleMute);
   const isHost = state.you?.isHost === true;
   const locked = controlsLocked(state);
   const custom = partyServer() && partyServer() !== DEFAULT_SERVER ? partyServer() : null;
@@ -213,7 +264,9 @@ function InParty() {
   const status =
     state.connection === 'live'
       ? state.clockSynced
-        ? `In sync · ${state.roundTripMs} ms round trip`
+        // performance.timeOrigin carries sub-millisecond precision, so the raw
+        // sample is a float; the phone's own string is an integer (`%1$d`).
+        ? `In sync · ${Math.round(state.roundTripMs)} ms round trip`
         : 'Measuring the clock…'
       : state.connection === 'connecting'
         ? 'Reconnecting…'
@@ -239,23 +292,40 @@ function InParty() {
       </h2>
       <section className={settingsUi.group}>
         {state.members.map((m) => (
-          <div key={m.memberId} className={settingsUi.integrationPlain}>
-            <Avatar name={m.displayName} url={m.avatarUrl} />
-            <span className={settingsUi.integrationName}>
-              {m.displayName}
-              {m.memberId === state.you?.memberId && <span className="text-secondary"> (you)</span>}
-            </span>
-            <span className={settingsUi.value}>
-              {m.isHost && <Crown size={14} aria-label="Host" />}
-              <span className="size-2 rounded-full bg-quaternary data-on:bg-green" data-on={m.connected || undefined} title={m.connected ? 'Connected' : 'Reconnecting'} />
-              {isHost && m.memberId !== state.you?.memberId && (
-                <button className={settingsUi.inlineButton} onClick={() => party.kick(m.memberId)} title="Remove from the party">
-                  <UserMinus size={13} />
-                </button>
-              )}
-            </span>
+          <div key={m.memberId}>
+            <div className={settingsUi.integrationPlain}>
+              <Avatar name={m.displayName} url={m.avatarUrl} />
+              <span className={settingsUi.integrationName}>
+                {m.displayName}
+                {m.memberId === state.you?.memberId && <span className="text-secondary"> (you)</span>}
+              </span>
+              <span className={settingsUi.value}>
+                {m.isHost && <Crown size={14} aria-label="Host" />}
+                <span className="size-2 rounded-full bg-quaternary data-on:bg-green" data-on={m.connected || undefined} title={m.connected ? 'Connected' : 'Reconnecting'} />
+                {isHost && m.memberId !== state.you?.memberId && (
+                  <button className={settingsUi.inlineButton} onClick={() => party.kick(m.memberId)} title="Remove from the party">
+                    <UserMinus size={13} />
+                  </button>
+                )}
+              </span>
+            </div>
+            {/* Under the row, not inside the grid: a slider squeezed beside a
+                name and a Remove button is a control nobody can hit. */}
+            {isHost && m.memberId !== state.you?.memberId && (
+              <MemberVolume percent={m.volumePercent} onSet={(percent) => party.setMemberVolume(m.memberId, percent)} />
+            )}
           </div>
         ))}
+      </section>
+
+      <h2 className={settingsUi.sectionHeader}>This device</h2>
+      <section className={settingsUi.group}>
+        <Toggle
+          label="Play on this device"
+          detail="This device’s own mute. Off keeps it silent while it still follows every control in the party; the others hear nothing of it."
+          checked={!muted}
+          onChange={() => toggleMute()}
+        />
       </section>
 
       <h2 className={settingsUi.sectionHeader}>Party</h2>

@@ -484,3 +484,126 @@ func TestQueueIndexPrefersTheCopyAtTheNeedle(t *testing.T) {
 		t.Fatalf("expected b at 3 despite a stale index, got %d", ps.QueueIndex)
 	}
 }
+
+func TestSetMemberVolumeIsHostOnly(t *testing.T) {
+	p := NewParty("TESTV1")
+	host, _ := p.Join("u1", "d1", "Host", nil)
+	listener, _ := p.Join("u2", "d2", "Listener", nil)
+	other, _ := p.Join("u3", "d3", "Other", nil)
+
+	percent := 40
+	// A listener who could set another's volume is not being controlled by it.
+	if err := p.SetMemberVolume(listener, other.MemberId, &percent); err == nil {
+		t.Fatalf("expected a listener to be refused")
+	} else if pe, ok := err.(*PartyError); !ok || pe.Code != "host_only" {
+		t.Errorf("expected host_only, got %v", err)
+	}
+	if other.VolumePercent != nil {
+		t.Errorf("a refused request must not have taken effect")
+	}
+
+	if err := p.SetMemberVolume(host, other.MemberId, &percent); err != nil {
+		t.Fatalf("host was refused: %v", err)
+	}
+	if other.VolumePercent == nil || *other.VolumePercent != 40 {
+		t.Errorf("the host's request did not take effect, got %v", other.VolumePercent)
+	}
+}
+
+func TestSetMemberVolumeRejectsWhatItCannotMean(t *testing.T) {
+	p := NewParty("TESTV2")
+	host, _ := p.Join("u1", "d1", "Host", nil)
+	listener, _ := p.Join("u2", "d2", "Listener", nil)
+
+	over := 101
+	under := -1
+	for _, value := range []*int{&over, &under} {
+		if err := p.SetMemberVolume(host, listener.MemberId, value); err == nil {
+			t.Errorf("expected %v to be refused", *value)
+		}
+	}
+
+	valid := 50
+	if err := p.SetMemberVolume(host, "nobody", &valid); err == nil {
+		t.Errorf("expected an unknown member to be refused")
+	} else if pe, ok := err.(*PartyError); !ok || pe.Code != "not_found" {
+		t.Errorf("expected not_found, got %v", err)
+	}
+
+	// The host's own speakers are the host's business; a stored second opinion
+	// would be a value nothing on their device reads.
+	if err := p.SetMemberVolume(host, host.MemberId, &over); err == nil {
+		t.Errorf("expected the host's own volume to be refused")
+	}
+}
+
+func TestVolumePercentIsOmittedUntilSet(t *testing.T) {
+	p := NewParty("TESTV3")
+	host, _ := p.Join("u1", "d1", "Host", nil)
+	listener, _ := p.Join("u2", "d2", "Listener", nil)
+
+	// Unset is not 0: a device that never had its volume set must be able to
+	// tell that apart from one the host silenced.
+	if _, present := listener.ToWire()["volumePercent"]; present {
+		t.Errorf("an unset volume must not appear on the wire")
+	}
+
+	zero := 0
+	if err := p.SetMemberVolume(host, listener.MemberId, &zero); err != nil {
+		t.Fatalf("host was refused: %v", err)
+	}
+	if wire := listener.ToWire()["volumePercent"]; wire != 0 {
+		t.Errorf("a silence the host asked for must travel, got %v", wire)
+	}
+
+	// Clearing hands the level back, and says so by omitting it again.
+	if err := p.SetMemberVolume(host, listener.MemberId, nil); err != nil {
+		t.Fatalf("clearing was refused: %v", err)
+	}
+	if _, present := listener.ToWire()["volumePercent"]; present {
+		t.Errorf("a cleared volume must not appear on the wire")
+	}
+}
+
+func TestVolumePercentTravelsOnTheSnapshot(t *testing.T) {
+	p := NewParty("TESTV4")
+	host, _ := p.Join("u1", "d1", "Host", nil)
+	listener, _ := p.Join("u2", "d2", "Listener", nil)
+
+	level := 65
+	if err := p.SetMemberVolume(host, listener.MemberId, &level); err != nil {
+		t.Fatalf("host was refused: %v", err)
+	}
+	// A device joining later has no other way to learn it.
+	wire := p.ToWire()
+	members, _ := wire["members"].([]map[string]interface{})
+	found := false
+	for _, m := range members {
+		if m["memberId"] == listener.MemberId {
+			found = true
+			if m["volumePercent"] != 65 {
+				t.Errorf("expected 65 on the snapshot, got %v", m["volumePercent"])
+			}
+		}
+	}
+	if !found {
+		t.Fatalf("the listener was missing from the snapshot")
+	}
+}
+
+func TestVolumeSurvivesAHostChange(t *testing.T) {
+	p := NewParty("TESTV5")
+	host, _ := p.Join("u1", "d1", "Host", nil)
+	listener, _ := p.Join("u2", "d2", "Listener", nil)
+
+	level := 30
+	if err := p.SetMemberVolume(host, listener.MemberId, &level); err != nil {
+		t.Fatalf("host was refused: %v", err)
+	}
+	// The setting belongs to the listener's slot, not to whoever set it, so a
+	// new host is not silently handed an un-set volume to re-establish.
+	p.Remove(host.MemberId)
+	if listener.VolumePercent == nil || *listener.VolumePercent != 30 {
+		t.Errorf("the volume must outlive the host who set it, got %v", listener.VolumePercent)
+	}
+}

@@ -730,6 +730,9 @@
     <string name="listen_together_you">אתם</string>
     <string name="listen_together_host">מארח</string>
     <string name="listen_together_away">מרוחק — המקום נשמר</string>
+    <string name="listen_together_volume_not_set">עוצמת שמע · הרמה של המכשיר הזה עצמו</string>
+    <string name="listen_together_volume_set">עוצמת שמע · %1$d%%</string>
+    <string name="listen_together_volume_clear">איפוס</string>
     <string name="listen_together_landing_title">התחלת מסיבה</string>
     <string name="listen_together_landing_subtitle">כי מוזיקה נשמעת טוב יותר ביחד. הזמינו חברים להאזין ולהוסיף שירים בזמן אמת, איפה שהם לא יהיו.</string>
     <string name="listen_together_create_action">יצירת מסיבה</string>
@@ -1462,4 +1465,11 @@
     <string name="bit_perfect_status_inexact">%1$s · לא מדויק: המקור הזה אינו PCM ללא אובדן</string>
     <string name="bit_perfect_status_waiting">ממתין לרצועת Lossless ביציאה נתמכת</string>
     <string name="bit_perfect_status_unavailable">לא זמין עבור רצועה זו (%1$s)</string>
+    <string name="automix_overview">סקירת Automix</string>
+    <string name="diwali_title">BitChord מאחלת לך דיוואלי שמח</string>
+    <string name="diwali_subtitle">שחג האורות הזה ימלא את ביתך בשמחה ואת ימיך במוזיקה.</string>
+    <string name="diwali_cta">בואו נחגוג</string>
+    <string name="listen_together_this_device">המכשיר הזה</string>
+    <string name="listen_together_play_on_device">השמעה במכשיר הזה</string>
+    <string name="listen_together_play_on_device_subtitle">ההשתקה של המכשיר הזה בלבד. כיבוי משאיר אותו שקט והוא ממשיך לציית לכל פקודה במסיבה; האחרים לא שומעים על כך דבר.</string>
 </resources>

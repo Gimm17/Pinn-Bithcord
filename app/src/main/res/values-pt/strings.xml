@@ -730,6 +730,9 @@
     <string name="listen_together_you">Você</string>
     <string name="listen_together_host">Anfitrião</string>
     <string name="listen_together_away">Ausente — o lugar está guardado</string>
+    <string name="listen_together_volume_not_set">Volume · nível próprio deste dispositivo</string>
+    <string name="listen_together_volume_set">Volume · %1$d%%</string>
+    <string name="listen_together_volume_clear">Redefinir</string>
     <string name="listen_together_landing_title">Comece uma festa</string>
     <string name="listen_together_landing_subtitle">Porque música soa melhor junto. Convide amigos para ouvir e adicionar músicas em tempo real, onde quer que estejam.</string>
     <string name="listen_together_create_action">Criar uma festa</string>
@@ -1462,4 +1465,11 @@
     <string name="bit_perfect_status_inexact">%1$s · não exato: esta fonte não é PCM sem perdas</string>
     <string name="bit_perfect_status_waiting">Aguardando uma faixa sem perdas em uma saída compatível</string>
     <string name="bit_perfect_status_unavailable">Indisponível para esta faixa (%1$s)</string>
+    <string name="automix_overview">Visão geral do Automix</string>
+    <string name="diwali_title">A BitChord deseja a você um feliz Diwali</string>
+    <string name="diwali_subtitle">Que este festival de luzes encha sua casa de alegria e seus dias de música.</string>
+    <string name="diwali_cta">Vamos comemorar</string>
+    <string name="listen_together_this_device">Este dispositivo</string>
+    <string name="listen_together_play_on_device">Reproduzir neste dispositivo</string>
+    <string name="listen_together_play_on_device_subtitle">O mudo próprio deste dispositivo. Desligado, ele fica em silêncio enquanto continua seguindo cada controle da sessão; os outros não ouvem nada disso.</string>
 </resources>

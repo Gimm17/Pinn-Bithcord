@@ -43,6 +43,11 @@ const (
 	ActionSetMaxMembers = "setMaxMembers"
 	ActionSetAutoplay = "setAutoplay"
 	ActionSetHostOnlyControl = "setHostOnlyControl"
+	// ActionSetMemberVolume sets how loud one listener's device should be. It
+	// is host-only and deliberately absent from ControlActions: a host who has
+	// turned on hostOnlyControl does not thereby gain the right to reach into
+	// someone's volume, and a host who has not still may.
+	ActionSetMemberVolume = "setMemberVolume"
 )
 
 // ControlActions are the actions a party's HostOnlyControl setting restricts to

@@ -550,3 +550,163 @@ func TestWebSocketTokenAsSubprotocol(t *testing.T) {
 		t.Fatalf("expected 401 for a wrong subprotocol token, got %v", err)
 	}
 }
+
+// A host moving a listener's volume has to reach that listener's own socket,
+// on the frame the client already reads, and has to be refused to everybody
+// else. This is the whole feature as a client experiences it.
+func TestHostSetsAListenerVolume(t *testing.T) {
+	ts := setupTestServer()
+	defer ts.Close()
+
+	join := func(path string, body map[string]string) (string, string) {
+		b, _ := json.Marshal(body)
+		res, err := http.Post(ts.URL+path, "application/json", bytes.NewReader(b))
+		if err != nil {
+			t.Fatalf("POST %s: %v", path, err)
+		}
+		defer res.Body.Close()
+		var decoded map[string]interface{}
+		if err := json.NewDecoder(res.Body).Decode(&decoded); err != nil {
+			t.Fatalf("decode %s: %v", path, err)
+		}
+		code, _ := decoded["code"].(string)
+		token, _ := decoded["token"].(string)
+		if code == "" || token == "" {
+			t.Fatalf("POST %s returned no code/token: %v", path, decoded)
+		}
+		return code, token
+	}
+
+	dial := func(code, token string) *websocket.Conn {
+		u, _ := url.Parse(ts.URL)
+		u.Scheme = "ws"
+		u.Path = fmt.Sprintf("/ws/parties/%s", code)
+		headers := http.Header{}
+		headers.Set("Authorization", "Bearer "+token)
+		conn, _, err := websocket.DefaultDialer.Dial(u.String(), headers)
+		if err != nil {
+			t.Fatalf("WebSocket connection failed: %v", err)
+		}
+		return conn
+	}
+
+	code, hostToken := join("/api/parties", map[string]string{"userId": "u1", "deviceId": "d1", "displayName": "Host"})
+	host := dial(code, hostToken)
+	defer host.Close()
+	var welcome map[string]interface{}
+	_ = host.SetReadDeadline(time.Now().Add(2 * time.Second))
+	if err := host.ReadJSON(&welcome); err != nil {
+		t.Fatalf("host welcome: %v", err)
+	}
+
+	_, listenerToken := join("/api/parties/"+code+"/join", map[string]string{"userId": "u2", "deviceId": "d2", "displayName": "Listener"})
+	listener := dial(code, listenerToken)
+	defer listener.Close()
+	var listenerWelcome map[string]interface{}
+	_ = listener.SetReadDeadline(time.Now().Add(2 * time.Second))
+	if err := listener.ReadJSON(&listenerWelcome); err != nil {
+		t.Fatalf("listener welcome: %v", err)
+	}
+	listenerId := ""
+	if you, ok := listenerWelcome["you"].(map[string]interface{}); ok {
+		listenerId, _ = you["memberId"].(string)
+	}
+	if listenerId == "" {
+		t.Fatalf("listener welcome carried no memberId: %v", listenerWelcome)
+	}
+
+	// The listener tries it first. A device that can set the others' volume is
+	// not being controlled by the host at all.
+	_ = listener.WriteJSON(map[string]interface{}{
+		"type":     protocol.FrameControl,
+		"action":   protocol.ActionSetMemberVolume,
+		"memberId": listenerId,
+		"percent":  10,
+	})
+
+	refused := false
+	for i := 0; i < 6 && !refused; i++ {
+		_ = listener.SetReadDeadline(time.Now().Add(2 * time.Second))
+		var f map[string]interface{}
+		if err := listener.ReadJSON(&f); err != nil {
+			break
+		}
+		if f["type"] == protocol.FrameError && f["error"] == "host_only" {
+			refused = true
+		}
+	}
+	if !refused {
+		t.Fatalf("a listener was allowed to set somebody's volume")
+	}
+
+	// Now the host does it, and the listener has to see the level on a members
+	// frame — the same frame that already carries who is in the party.
+	if err := host.WriteJSON(map[string]interface{}{
+		"type":     protocol.FrameControl,
+		"action":   protocol.ActionSetMemberVolume,
+		"memberId": listenerId,
+		"percent":  35,
+	}); err != nil {
+		t.Fatalf("host setMemberVolume: %v", err)
+	}
+
+	seen := false
+	for i := 0; i < 12 && !seen; i++ {
+		_ = listener.SetReadDeadline(time.Now().Add(2 * time.Second))
+		var f map[string]interface{}
+		if err := listener.ReadJSON(&f); err != nil {
+			break
+		}
+		if f["type"] != protocol.FrameMembers {
+			continue
+		}
+		members, _ := f["members"].([]interface{})
+		for _, raw := range members {
+			m, _ := raw.(map[string]interface{})
+			if m["memberId"] != listenerId {
+				continue
+			}
+			if m["volumePercent"] != float64(35) {
+				t.Fatalf("expected 35%% on the listener's row, got %v", m["volumePercent"])
+			}
+			seen = true
+		}
+	}
+	if !seen {
+		t.Fatalf("the host's volume never reached the listener")
+	}
+
+	// Clearing hands the level back, and says so by leaving the field out.
+	if err := host.WriteJSON(map[string]interface{}{
+		"type":     protocol.FrameControl,
+		"action":   protocol.ActionSetMemberVolume,
+		"memberId": listenerId,
+	}); err != nil {
+		t.Fatalf("host clear volume: %v", err)
+	}
+
+	cleared := false
+	for i := 0; i < 12 && !cleared; i++ {
+		_ = listener.SetReadDeadline(time.Now().Add(2 * time.Second))
+		var f map[string]interface{}
+		if err := listener.ReadJSON(&f); err != nil {
+			break
+		}
+		if f["type"] != protocol.FrameMembers {
+			continue
+		}
+		members, _ := f["members"].([]interface{})
+		for _, raw := range members {
+			m, _ := raw.(map[string]interface{})
+			if m["memberId"] != listenerId {
+				continue
+			}
+			if _, present := m["volumePercent"]; !present {
+				cleared = true
+			}
+		}
+	}
+	if !cleared {
+		t.Fatalf("clearing the volume never reached the listener")
+	}
+}

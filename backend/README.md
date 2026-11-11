@@ -150,14 +150,35 @@ Client → server:
 {"type": "control", "action": "next"}
 {"type": "control", "action": "previous"}
 {"type": "control", "action": "setHostOnlyControl", "enabled": true}   // host only
+{"type": "control", "action": "setMemberVolume", "memberId": "…", "percent": 35}   // host only
+{"type": "control", "action": "setMemberVolume", "memberId": "…"}                  // host only, clears
 ```
 
-`setMaxMembers`, `kick` and `setHostOnlyControl` are host-only and answer
-`403 host_only` to anybody else. While `hostOnlyControl` is on, so is every
-action above them in that list — `play`, `pause`, `seek`, `setTrack`,
-`setQueue`, `queueAdd`, `queueRemove`, `queueClear`, `queueMove`, `next`,
-`previous` and `setAutoplay` — which is what makes the restriction real rather
-than a matter of the app hiding its own buttons.
+`setMaxMembers`, `kick`, `setHostOnlyControl` and `setMemberVolume` are
+host-only and answer `403 host_only` to anybody else. While `hostOnlyControl`
+is on, so is every action above them in that list — `play`, `pause`, `seek`,
+`setTrack`, `setQueue`, `queueAdd`, `queueRemove`, `queueClear`, `queueMove`,
+`next`, `previous` and `setAutoplay` — which is what makes the restriction real
+rather than a matter of the app hiding its own buttons.
+
+`setMemberVolume` is not one of those: it is host-only whether or not
+`hostOnlyControl` is on. Reaching into someone's speakers is a different act
+from driving the music everybody hears, and a host who has not taken control of
+the music has not thereby asked for the right to change a listener's volume.
+
+`percent` is 0–100 and is the level of that device's own music stream.
+Omitting it — or sending `null` — clears the setting and hands the level back to
+the listener, which is not the same as setting it to 0. The host's own row is
+refused (`422 invalid_member`): their speakers are set on their own device, and
+a stored second opinion would be a number nothing on that device reads.
+
+The level travels as `volumePercent`, on the `members` frame and in the
+snapshot, and is absent from a member nobody has set it for. Absent therefore
+means "not set", never "silent".
+
+A listener's hardware volume keys still override what the host sets: this is
+the device's music stream, not a gain stage the party owns. The server is the
+authority on the number, not on the speaker.
 
 The flag travels on the `members` frame, alongside `maxMembers`, and in the
 snapshot; it is deliberately not on the state frame, which rides the heartbeat.
@@ -187,7 +208,7 @@ Server → client:
 {"type": "pong",    "clientMs": …, "serverMs": …}
 {"type": "state",   "playback": {…}, "serverMs": …}
 {"type": "queue",   "queue": {"seq": 3, "index": 1, "items": [{…}]}, "serverMs": …}
-{"type": "members", "members": [{…}], "maxMembers": 5, "serverMs": …}
+{"type": "members", "members": [{…}], "maxMembers": 5, "hostOnlyControl": false, "serverMs": …}
 {"type": "error",   "error": "rate_limited", "message": "…"}
 {"type": "bye",     "reason": "left"}
 ```

@@ -726,6 +726,9 @@
     <string name="listen_together_you">Vous</string>
     <string name="listen_together_host">Hôte</string>
     <string name="listen_together_away">Absent — sa place est gardée</string>
+    <string name="listen_together_volume_not_set">Volume · niveau propre à cet appareil</string>
+    <string name="listen_together_volume_set">Volume · %1$d%%</string>
+    <string name="listen_together_volume_clear">Réinitialiser</string>
     <string name="listen_together_landing_title">Lancer une session</string>
     <string name="listen_together_landing_subtitle">Parce que la musique sonne mieux à plusieurs. Invitez vos amis à écouter et à ajouter des titres en temps réel, où qu\'ils soient.</string>
     <string name="listen_together_create_action">Créer une session</string>
@@ -1458,4 +1461,11 @@
     <string name="bit_perfect_status_inexact">%1$s · inexact : cette source n\'est pas du PCM sans perte</string>
     <string name="bit_perfect_status_waiting">En attente d\'un morceau sans perte sur une sortie compatible</string>
     <string name="bit_perfect_status_unavailable">Indisponible pour ce morceau (%1$s)</string>
+    <string name="automix_overview">Aperçu d’Automix</string>
+    <string name="diwali_title">BitChord vous souhaite un joyeux Diwali</string>
+    <string name="diwali_subtitle">Que cette fête des lumières remplisse votre foyer de joie et vos journées de musique.</string>
+    <string name="diwali_cta">Célébrons</string>
+    <string name="listen_together_this_device">Cet appareil</string>
+    <string name="listen_together_play_on_device">Lire sur cet appareil</string>
+    <string name="listen_together_play_on_device_subtitle">La sourdine propre à cet appareil. Désactivée, elle le garde silencieux tout en suivant chaque commande de la session ; les autres n’en entendent rien.</string>
 </resources>

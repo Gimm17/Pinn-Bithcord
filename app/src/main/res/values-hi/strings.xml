@@ -725,6 +725,9 @@
     <string name="listen_together_you">आप</string>
     <string name="listen_together_host">होस्ट</string>
     <string name="listen_together_away">दूर हैं — उनकी जगह रखी है</string>
+    <string name="listen_together_volume_not_set">वॉल्यूम · इस डिवाइस का अपना स्तर</string>
+    <string name="listen_together_volume_set">वॉल्यूम · %1$d%%</string>
+    <string name="listen_together_volume_clear">रीसेट</string>
     <string name="listen_together_landing_title">पार्टी शुरू करें</string>
     <string name="listen_together_landing_subtitle">क्योंकि संगीत साथ में बेहतर लगता है। दोस्तों को साथ सुनने और रियल टाइम में गाने जोड़ने के लिए बुलाएँ, चाहे वे कहीं भी हों।</string>
     <string name="listen_together_create_action">पार्टी बनाएँ</string>
@@ -1460,4 +1463,8 @@
     <string name="diwali_title">BitChord की ओर से दीपावली की शुभकामनाएँ</string>
     <string name="diwali_subtitle">रोशनी का यह त्योहार आपके घर को खुशियों से और आपके दिनों को संगीत से भर दे।</string>
     <string name="diwali_cta">चलो जश्न मनाएँ</string>
+    <string name="automix_overview">ऑटोमिक्स अवलोकन</string>
+    <string name="listen_together_this_device">यह डिवाइस</string>
+    <string name="listen_together_play_on_device">इस डिवाइस पर चलाएँ</string>
+    <string name="listen_together_play_on_device_subtitle">यह डिवाइस अपने आप चुप रहता है। बंद करने पर यह चुप रहते हुए भी पार्टी के हर कंट्रोल का पालन करता रहता है; बाकी लोगों को इसकी भनक तक नहीं लगती।</string>
 </resources>

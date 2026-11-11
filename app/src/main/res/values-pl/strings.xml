@@ -761,6 +761,9 @@
     <string name="listen_together_you">Ty</string>
     <string name="listen_together_host">Gospodarz</string>
     <string name="listen_together_away">Poza zasięgiem — miejsce jest trzymane</string>
+    <string name="listen_together_volume_not_set">Głośność · własny poziom tego urządzenia</string>
+    <string name="listen_together_volume_set">Głośność · %1$d%%</string>
+    <string name="listen_together_volume_clear">Przywróć</string>
     <string name="listen_together_landing_title">Rozpocznij imprezę</string>
     <string name="listen_together_landing_subtitle">Bo muzyka razem brzmi lepiej. Zaproś znajomych, by słuchali i dodawali utwory na żywo, gdziekolwiek są.</string>
     <string name="listen_together_create_action">Utwórz imprezę</string>
@@ -1497,4 +1500,11 @@
     <string name="bit_perfect_status_inexact">%1$s · niedokładne: to źródło nie jest bezstratnym PCM</string>
     <string name="bit_perfect_status_waiting">Oczekiwanie na bezstratny utwór na obsługiwanym wyjściu</string>
     <string name="bit_perfect_status_unavailable">Niedostępne dla tego utworu (%1$s)</string>
+    <string name="automix_overview">Przegląd Automiksu</string>
+    <string name="diwali_title">BitChord życzy Ci wesołego Diwali</string>
+    <string name="diwali_subtitle">Niech to święto światła napełni Twój dom radością, a dni muzyką.</string>
+    <string name="diwali_cta">Świętujmy</string>
+    <string name="listen_together_this_device">To urządzenie</string>
+    <string name="listen_together_play_on_device">Odtwarzaj na tym urządzeniu</string>
+    <string name="listen_together_play_on_device_subtitle">Wyciszenie tylko tego urządzenia. Wyłączone utrzymuje ciszę, a urządzenie nadal wykonuje każde polecenie w sesji; pozostali nic o tym nie wiedzą.</string>
 </resources>

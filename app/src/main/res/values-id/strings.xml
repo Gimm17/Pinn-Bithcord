@@ -705,6 +705,9 @@
     <string name="listen_together_you">Kamu</string>
     <string name="listen_together_host">Tuan rumah</string>
     <string name="listen_together_away">Sedang menjauh — tempatnya ditahan</string>
+    <string name="listen_together_volume_not_set">Volume · level perangkat ini sendiri</string>
+    <string name="listen_together_volume_set">Volume · %1$d%%</string>
+    <string name="listen_together_volume_clear">Setel ulang</string>
     <string name="listen_together_landing_title">Mulai pesta</string>
     <string name="listen_together_landing_subtitle">Karena musik lebih seru didengar bersama. Ajak teman mendengarkan dan menambahkan lagu secara langsung, di mana pun mereka berada.</string>
     <string name="listen_together_create_action">Buat pesta</string>
@@ -1434,4 +1437,11 @@
     <string name="bit_perfect_status_inexact">%1$s · tidak persis: sumber ini bukan PCM lossless</string>
     <string name="bit_perfect_status_waiting">Menunggu trek lossless pada output yang didukung</string>
     <string name="bit_perfect_status_unavailable">Tidak tersedia untuk trek ini (%1$s)</string>
+    <string name="automix_overview">Ringkasan Automix</string>
+    <string name="diwali_title">BitChord mengucapkan selamat Diwali</string>
+    <string name="diwali_subtitle">Semoga festival cahaya ini memenuhi rumahmu dengan kebahagiaan dan harimu dengan musik.</string>
+    <string name="diwali_cta">Mari Rayakan</string>
+    <string name="listen_together_this_device">Perangkat ini</string>
+    <string name="listen_together_play_on_device">Putar di perangkat ini</string>
+    <string name="listen_together_play_on_device_subtitle">Bisukan bawaan perangkat ini. Kalau dimatikan, perangkat tetap diam sambil tetap mengikuti setiap kontrol di party; yang lain tidak mendengar apa pun soal itu.</string>
 </resources>

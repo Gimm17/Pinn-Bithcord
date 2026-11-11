@@ -49,6 +49,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Slider
 import com.music.bitchord.ui.components.IosSwitch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -94,6 +95,8 @@ import com.music.bitchord.data.listentogether.PartyActivity
 import com.music.bitchord.data.listentogether.PartyMember
 import com.music.bitchord.data.listentogether.ServerConnectionState
 import com.music.bitchord.data.listentogether.ServerUrlError
+import com.music.bitchord.data.settings.AppSettings
+import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -513,6 +516,7 @@ fun ListenTogetherScreen(
                 onSetCapacity = ListenTogether::setMaxMembers,
                 onSetHostOnlyControl = ListenTogether::setHostOnlyControl,
                 onKick = ListenTogether::kick,
+                onSetMemberVolume = ListenTogether::setMemberVolume,
             )
             // Inside the party branch on purpose. A log of who skipped what is
             // a thing to look back over while a party is running; on the page
@@ -840,6 +844,7 @@ private fun InAParty(
     onSetCapacity: (Int) -> Unit,
     onSetHostOnlyControl: (Boolean) -> Unit,
     onKick: (String) -> Unit,
+    onSetMemberVolume: (String, Int?) -> Unit,
 ) {
     SettingsGroup(
         header = stringResource(R.string.listen_together_code),
@@ -872,6 +877,28 @@ private fun InAParty(
     }
 
     NowPlayingInTheParty(state)
+
+    // Its own group above the party's own settings, because it is not one: it
+    // changes nothing anybody else hears, and reading it as a party control is
+    // exactly the mistake it exists to prevent.
+    val playOnThisDevice by AppSettings.playInPartyOnThisDevice.collectAsStateWithLifecycle()
+    SettingsGroup(
+        header = stringResource(R.string.listen_together_this_device),
+        footer = stringResource(R.string.listen_together_play_on_device_subtitle),
+    ) {
+        SettingsRow(
+            icon = SfIcons.VolumeUp,
+            title = stringResource(R.string.listen_together_play_on_device),
+            subtitle = null,
+            trailing = {
+                IosSwitch(
+                    checked = playOnThisDevice,
+                    onCheckedChange = AppSettings::setPlayInPartyOnThisDevice,
+                )
+            },
+            onClick = { AppSettings.setPlayInPartyOnThisDevice(!playOnThisDevice) },
+        )
+    }
 
     SettingsGroup(
         header = stringResource(
@@ -915,7 +942,19 @@ private fun InAParty(
         }
         state.members.forEachIndexed { index, member ->
             if (index > 0) RowDivider()
-            MemberRow(member = member, isYou = member.memberId == state.you?.memberId, canKick = state.you?.isHost == true && !member.isHost, onKick = { onKick(member.memberId) })
+            MemberRow(
+                member = member,
+                isYou = member.memberId == state.you?.memberId,
+                canKick = state.you?.isHost == true && !member.isHost,
+                onKick = { onKick(member.memberId) },
+                // Only the host may set somebody else's level, and never their
+                // own: their own speakers are the volume bar's business.
+                onSetVolume = if (state.you?.isHost == true && !member.isHost) {
+                    { percent -> onSetMemberVolume(member.memberId, percent) }
+                } else {
+                    null
+                },
+            )
         }
     }
 
@@ -1018,7 +1057,14 @@ private fun PartyAvatar(url: String?, size: Dp = ICON_SIZE) {
 }
 
 @Composable
-private fun MemberRow(member: PartyMember, isYou: Boolean, canKick: Boolean = false, onKick: () -> Unit = {}) {
+private fun MemberRow(
+    member: PartyMember,
+    isYou: Boolean,
+    canKick: Boolean = false,
+    onKick: () -> Unit = {},
+    /** Non-null only for a host looking at somebody else; null hides the slider entirely. */
+    onSetVolume: ((Int?) -> Unit)? = null,
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -1079,6 +1125,69 @@ private fun MemberRow(member: PartyMember, isYou: Boolean, canKick: Boolean = fa
         } else if (canKick) {
             TextButton(onClick = onKick) { Text(stringResource(R.string.listen_together_remove)) }
         }
+    }
+    // Under the row rather than beside it: a slider squeezed next to a name and
+    // a Remove button is a control nobody can hit on a phone.
+    if (onSetVolume != null) {
+        MemberVolumeSlider(member = member, onSetVolume = onSetVolume)
+    }
+}
+
+/**
+ * The host's level for one listener's device.
+ *
+ * The value is the party's, read back off the members frame, so the slider
+ * shows 0–100 only while the host has actually set something. That is what lets
+ * "not set" be a real state: the row says so, and the slider starts from where
+ * that device's own volume already is rather than snapping it to a number the
+ * host never chose.
+ */
+@Composable
+private fun MemberVolumeSlider(member: PartyMember, onSetVolume: (Int?) -> Unit) {
+    val set = member.volumePercent
+    // While dragging, the party cannot answer fast enough to drive the thumb,
+    // so the thumb follows the finger and the party value takes over again once
+    // the gesture ends. Resetting the remembered value on every new frame would
+    // fight the finger; keying it to the member's own level is what makes a
+    // host who clears the level see the slider follow.
+    var dragging by remember(member.memberId, set) { mutableStateOf(false) }
+    var dragged by remember(member.memberId, set) { mutableStateOf(set?.toFloat() ?: 0f) }
+    val shown = if (dragging) dragged else (set?.toFloat() ?: dragged)
+    val percent = shown.roundToInt()
+
+    Column(Modifier.padding(start = 60.dp, end = ROW_INSET, bottom = 10.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = if (set == null) {
+                    stringResource(R.string.listen_together_volume_not_set)
+                } else {
+                    stringResource(R.string.listen_together_volume_set, percent)
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
+            )
+            // Only offered once there is something to hand back, so the row
+            // does not carry a button that does nothing.
+            if (set != null) {
+                TextButton(onClick = { onSetVolume(null) }) {
+                    Text(stringResource(R.string.listen_together_volume_clear))
+                }
+            }
+        }
+        Slider(
+            value = shown.coerceIn(0f, 100f),
+            onValueChange = {
+                dragging = true
+                dragged = it
+            },
+            onValueChangeFinished = {
+                dragging = false
+                onSetVolume(dragged.roundToInt().coerceIn(0, 100))
+            },
+            valueRange = 0f..100f,
+            steps = 99,
+        )
     }
 }
 

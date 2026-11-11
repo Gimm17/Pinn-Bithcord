@@ -704,6 +704,9 @@
     <string name="listen_together_you">你</string>
     <string name="listen_together_host">主持人</string>
     <string name="listen_together_away">暫離 — 位置為其保留</string>
+    <string name="listen_together_volume_not_set">音量 · 此裝置自己的音量</string>
+    <string name="listen_together_volume_set">音量 · %1$d%%</string>
+    <string name="listen_together_volume_clear">重設</string>
     <string name="listen_together_landing_title">開始派對</string>
     <string name="listen_together_landing_subtitle">因為一起聽的音樂更動聽。邀請朋友一起收聽，並實時新增歌曲，無論他們身在何處。</string>
     <string name="listen_together_create_action">建立派對</string>
@@ -1434,4 +1437,11 @@
     <string name="download_addon_not_allowed">%1$s 不允許下載，因此你的歌曲將從其他來源儲存。</string>
     <string name="download_addon_needs_lossless_output">%1$s 僅在連接有線、USB 或 LDAC 等級耳機時提供音樂。在連接此類耳機前，下載會略過它，因此你的歌曲將從其他來源儲存。</string>
     <string name="source_downloads_on">允許下載</string>
+    <string name="automix_overview">自動混音概覽</string>
+    <string name="diwali_title">BitChord 祝你排燈節快樂</string>
+    <string name="diwali_subtitle">願這個光明之節點亮你的家，讓喜悅與音樂充滿你的每一天。</string>
+    <string name="diwali_cta">一起慶祝</string>
+    <string name="listen_together_this_device">此裝置</string>
+    <string name="listen_together_play_on_device">在此裝置上播放</string>
+    <string name="listen_together_play_on_device_subtitle">此裝置本身的靜音。關閉後它保持靜音，但仍會跟隨聚會中的每一項控制；其他人不會察覺。</string>
 </resources>

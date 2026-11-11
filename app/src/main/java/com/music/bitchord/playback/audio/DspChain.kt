@@ -84,6 +84,12 @@ class DspChain(
         // see; the loudness stage's limiter is what catches whatever survives.
         loudness.holdLimiter = equalizer.isShaping
         loudness.process(block)
+        // Last, so nothing downstream can bring the level back: the party's
+        // switch silences this device and nothing else about playback changes.
+        // A gain stage rather than a pause, which is what keeps skip, next and
+        // the queue alive on a device that has been told to be quiet. See
+        // [PartyMute].
+        if (PartyMute.silenced) PartyMute.silence(block.samples, 0, block.sampleCount)
     }
 
     @Suppress("DEPRECATION")

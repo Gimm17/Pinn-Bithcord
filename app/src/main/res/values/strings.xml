@@ -1008,6 +1008,9 @@
     <string name="listen_together_you">You</string>
     <string name="listen_together_host">Host</string>
     <string name="listen_together_away">Away — their slot is held</string>
+    <string name="listen_together_volume_not_set">Volume · this device’s own level</string>
+    <string name="listen_together_volume_set">Volume · %1$d%%</string>
+    <string name="listen_together_volume_clear">Reset</string>
     <string name="listen_together_landing_title">Start a party</string>
     <string name="listen_together_landing_subtitle">Because music sounds better together. Invite friends to listen and add songs in real time, wherever they are.</string>
     <string name="listen_together_create_action">Create a party</string>
@@ -1028,6 +1031,9 @@
     <string name="listen_together_host_only">Only I control the music</string>
     <string name="listen_together_host_only_subtitle">Everyone else listens along and can pause on their own device</string>
     <string name="listen_together_host_only_notice">Only the host can control the music</string>
+    <string name="listen_together_this_device">This device</string>
+    <string name="listen_together_play_on_device">Play on this device</string>
+    <string name="listen_together_play_on_device_subtitle">This device’s own mute. Off keeps it silent while it still follows every control in the party; the others hear nothing of it.</string>
     <string name="listen_together_leave">Leave the party</string>
     <string name="listen_together_leave_subtitle">The others carry on listening</string>
     <string name="listen_together_reconnecting">Reconnecting…</string>

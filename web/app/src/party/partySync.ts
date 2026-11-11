@@ -443,6 +443,37 @@ export function startPartySync(): () => void {
     inParty: () => !!useParty.getState().code,
   });
   let key = '';
+  // The host's level for this device, as last applied here. Kept out of the
+  // subscription key so a level arriving mid-playback does not also re-run the
+  // whole reconcile, and checked before writing so the heartbeat's repeats are
+  // free.
+  let volumeKey = '';
+  /** The level this device had before the host set one, to hand back on a Reset. */
+  let restoredVolume: number | null = null;
+  const applyHostVolume = () => {
+    const state = useParty.getState();
+    const mine = state.members.find((m) => m.memberId === state.you?.memberId);
+    const percent = mine?.volumePercent ?? null;
+    const next = percent === null ? '' : String(percent);
+    if (next === volumeKey) return;
+    volumeKey = next;
+    // Un-set hands the level back where it was when the host first touched it,
+    // not to zero: a device nobody is controlling must not be left silent.
+    if (percent === null) {
+      if (restoredVolume !== null) usePlayer.getState().setVolume(restoredVolume);
+      restoredVolume = null;
+      return;
+    }
+    // `setVolume` clears the player's own mute on the desktop, and the mute is
+    // the listener's last word on their own device. So the level is applied
+    // and the mute put back, rather than the slider switching someone's
+    // "Play on this device" back on for them.
+    const player = usePlayer.getState();
+    const wasMuted = player.muted;
+    if (restoredVolume === null) restoredVolume = player.volume;
+    player.setVolume(percent / 100);
+    if (wasMuted && !usePlayer.getState().muted) usePlayer.getState().toggleMute();
+  };
   const off = useParty.subscribe((state) => {
     const next = `${state.playback.seq}|${state.queue.seq}|${state.code}|${state.clockSynced}`;
     if (next === key) return;
@@ -455,6 +486,7 @@ export function startPartySync(): () => void {
     }
     // Every control this device sent has come back around (or someone moved the party past ours).
     if (state.playback.seq >= awaitPlaybackSeq && state.queue.seq >= awaitQueueSeq) reconcileQuietUntil = 0;
+    applyHostVolume();
     reconcile();
     maybeTopUpAutoplay();
   });

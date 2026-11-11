@@ -751,6 +751,9 @@
     <string name="listen_together_you">คุณ</string>
     <string name="listen_together_host">เจ้าของปาร์ตี้</string>
     <string name="listen_together_away">ไม่อยู่ — ที่นั่งยังถูกจองไว้</string>
+    <string name="listen_together_volume_not_set">ระดับเสียง · ระดับของอุปกรณ์นี้เอง</string>
+    <string name="listen_together_volume_set">ระดับเสียง · %1$d%%</string>
+    <string name="listen_together_volume_clear">รีเซ็ต</string>
     <string name="listen_together_landing_title">เริ่มปาร์ตี้</string>
     <string name="listen_together_landing_subtitle">เพราะเพลงฟังด้วยกันยิ่งเพราะ ชวนเพื่อนมาฟังและเพิ่มเพลงแบบเรียลไทม์ได้ ไม่ว่าจะอยู่ที่ไหน</string>
     <string name="listen_together_create_action">สร้างปาร์ตี้</string>
@@ -1440,4 +1443,11 @@
     <string name="bit_perfect_status_inexact">%1$s · ไม่ตรงทุกบิต: แหล่งนี้ไม่ใช่ PCM แบบไม่สูญเสียคุณภาพ</string>
     <string name="bit_perfect_status_waiting">กำลังรอแทร็กแบบไม่สูญเสียคุณภาพบนเอาต์พุตที่รองรับ</string>
     <string name="bit_perfect_status_unavailable">ไม่พร้อมใช้งานสำหรับแทร็กนี้ (%1$s)</string>
+    <string name="automix_overview">ภาพรวม Automix</string>
+    <string name="diwali_title">BitChord ขออวยพรให้คุณสุขสันต์วันดีวาลี</string>
+    <string name="diwali_subtitle">ขอให้เทศกาลแห่งแสงสว่างนี้เติมเต็มบ้านของคุณด้วยความสุข และเติมเต็มวันคืนของคุณด้วยเสียงเพลง</string>
+    <string name="diwali_cta">ฉลองกันเลย</string>
+    <string name="listen_together_this_device">อุปกรณ์เครื่องนี้</string>
+    <string name="listen_together_play_on_device">เล่นบนอุปกรณ์เครื่องนี้</string>
+    <string name="listen_together_play_on_device_subtitle">การปิดเสียงเฉพาะอุปกรณ์เครื่องนี้ เมื่อปิดไว้ เครื่องจะเงียบแต่ยังทำตามทุกคำสั่งในปาร์ตี้ คนอื่นไม่ได้ยินเรื่องนี้เลย</string>
 </resources>

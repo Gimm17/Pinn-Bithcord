@@ -452,6 +452,19 @@ object AppSettings {
     /** Hides the volume slider on the main player, leaving the rest of the layout to reflow. */
     val hideVolumeBar = MutableStateFlow(false)
 
+    /**
+     * Whether this device plays the party out loud.
+     *
+     * Off is a local mute in the Spotify sense, not a control: the phone keeps
+     * loading the party's track and its queue and keeps following every control,
+     * while making no sound and telling the party nothing about it. Every other
+     * member hears the same music either way.
+     *
+     * Defaults to true — a device that joins a party is expected to be one of the
+     * places the music comes out of. See [com.music.bitchord.playback.PartySync].
+     */
+    val playInPartyOnThisDevice = MutableStateFlow(true)
+
     /** Hides the device status bar (clock, battery, notifications) while the main player is open. */
     val hideStatusBarInPlayer = MutableStateFlow(false)
 
@@ -1028,6 +1041,7 @@ object AppSettings {
         )
         stopOnTaskRemoved.value = prefs.getBoolean(KEY_STOP_ON_TASK_REMOVED, true)
         hideVolumeBar.value = prefs.getBoolean(KEY_HIDE_VOLUME_BAR, false)
+        playInPartyOnThisDevice.value = prefs.getBoolean(KEY_PLAY_IN_PARTY, true)
         hideStatusBarInPlayer.value = prefs.getBoolean(KEY_HIDE_STATUS_BAR_IN_PLAYER, false)
         hideSongStatus.value = prefs.getBoolean(KEY_HIDE_SONG_STATUS, false)
         showQueueHistory.value = prefs.getBoolean(KEY_SHOW_QUEUE_HISTORY, false)
@@ -1437,6 +1451,11 @@ object AppSettings {
     fun setHideVolumeBar(value: Boolean) {
         hideVolumeBar.value = value
         prefs.edit().putBoolean(KEY_HIDE_VOLUME_BAR, value).apply()
+    }
+
+    fun setPlayInPartyOnThisDevice(value: Boolean) {
+        playInPartyOnThisDevice.value = value
+        prefs.edit().putBoolean(KEY_PLAY_IN_PARTY, value).apply()
     }
 
     fun setHideStatusBarInPlayer(value: Boolean) {
@@ -2292,6 +2311,7 @@ object AppSettings {
     private const val KEY_PERFORMANCE_REFRESH_RATE = "performance_refresh_rate"
     private const val KEY_STOP_ON_TASK_REMOVED = "stop_on_task_removed"
     private const val KEY_HIDE_VOLUME_BAR = "hide_volume_bar"
+    private const val KEY_PLAY_IN_PARTY = "play_in_party_on_this_device"
     private const val KEY_HIDE_STATUS_BAR_IN_PLAYER = "hide_status_bar_in_player"
     private const val KEY_HIDE_SONG_STATUS = "hide_song_status"
     private const val KEY_SHOW_QUEUE_HISTORY = "show_queue_history"

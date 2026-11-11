@@ -46,6 +46,16 @@ data class PartyMember(
     val connected: Boolean = false,
     val joinedAtMs: Long = 0,
     val lastSeenMs: Long = 0,
+    /**
+     * The level the host set for this device, 0–100, or null when nobody has
+     * set one.
+     *
+     * Null and 0 are different instructions and the server keeps them apart:
+     * null is "the listener's own level stands", 0 is "the host silenced this
+     * device". A client that folded one into the other would permanently mute
+     * everyone the first time a host moved a slider to zero and then let go.
+     */
+    val volumePercent: Int? = null,
 )
 
 /**

@@ -421,7 +421,8 @@ class PartySync(
      */
     fun shouldDeferPlay(): Boolean {
         val party = ListenTogether.state.value
-        if (!party.inParty || party.connection != ListenTogether.Connection.LIVE) return false
+        if (!party.inParty) return false
+        if (party.connection != ListenTogether.Connection.LIVE) return false
         if (!party.clockSynced) return false
         // Already going, so there is nothing to hold back: `play()` on a player
         // that never stopped does nothing anywhere, and swallowing it here made
@@ -522,16 +523,24 @@ class PartySync(
         loadingVideoId = null
         reconcileQueue(party, exo)
 
-        // Muted by its own listener while the party plays on. Everything above
-        // this line still applies — the track the party moved to is loaded, the
-        // queue behind it is kept — and everything below it is sound: starting
-        // the player, and chasing a playhead nobody here can hear.
+        // A listener who paused their own device while the party plays on.
+        // Everything above this line still applies — the track the party moved
+        // to is loaded, the queue behind it is kept — and everything below it is
+        // sound: starting the player, and chasing a playhead nobody here can
+        // hear.
+        //
+        // The "Play on this device" switch is deliberately *not* here. Silence
+        // is applied where the samples are, not by parking the player, because a
+        // parked player is indistinguishable from one the listener stopped — and
+        // that is what took skip, next and the transport away from a device that
+        // had only been asked to be quiet. See [com.music.bitchord.playback.audio.PartyMute].
         if (locallyPaused) {
             // Nothing below here will start this device while the pause holds,
             // so a resume still waiting on the party is never going to be
             // answered — and the transport would draw that wait for as long as
-            // the listener stayed muted.
+            // the listener stayed paused.
             deferredPlayPending = false
+            if (exo.playWhenReady) exo.pause()
             return
         }
 
