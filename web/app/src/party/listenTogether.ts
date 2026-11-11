@@ -3,6 +3,7 @@ import { config } from '@/config';
 import { ytAuthSnapshot } from '@/extension/useYtAuth';
 import { ServerClock } from './clock';
 import { cleanCode, CODE_LENGTH, sanitizeServerUrl } from './invite';
+import { partyTransport, type PartyResponse } from './nativeTransport';
 import {
   EMPTY_PLAYBACK,
   EMPTY_QUEUE,
@@ -177,8 +178,14 @@ async function identity(): Promise<Omit<JoinRequest, 'maxMembers' | 'autoplayEna
   };
 }
 
-async function errorOf(response: Response): Promise<PartyError> {
-  const body = (await response.json().catch(() => null)) as { error?: string; message?: string } | null;
+/** Reads a failed transport reply the way the server's JSON error body does. */
+async function errorOf(response: PartyResponse): Promise<PartyError> {
+  let body: { error?: string; message?: string } | null = null;
+  try {
+    body = JSON.parse(response.body) as { error?: string; message?: string };
+  } catch {
+    body = null;
+  }
   return new PartyError(
     body?.error || `http_${response.status}`,
     body?.message || (response.status === 422 ? 'This account can’t be used to jam.' : `The party server said ${response.status}.`),
@@ -186,15 +193,15 @@ async function errorOf(response: Response): Promise<PartyError> {
   );
 }
 
-async function request<T>(url: string, init: RequestInit = {}): Promise<T> {
-  let response: Response;
+async function request<T>(url: string, init: { method?: string; body?: string } = {}): Promise<T> {
+  let response: PartyResponse;
   try {
-    response = await fetch(url, { ...init, headers: { 'Content-Type': 'application/json', ...init.headers } });
+    response = await partyTransport().request(url, { ...init, headers: { 'Content-Type': 'application/json' } });
   } catch {
     throw new PartyError('unreachable', UNREACHABLE);
   }
-  if (!response.ok) throw await errorOf(response);
-  return (await response.json()) as T;
+  if (response.status < 200 || response.status >= 300) throw await errorOf(response);
+  return JSON.parse(response.body) as T;
 }
 
 function adoptMembership(base: string, membership: PartyMembership): string {
@@ -278,7 +285,8 @@ export async function previewParty(rawCode: string, serverUrl?: string | null): 
 }
 
 function releaseSlot(base: string, code: string, held: string): Promise<void> {
-  return fetch(`${base}/api/parties/${code}/leave`, { method: 'POST', headers: { Authorization: `Bearer ${held}` } })
+  return partyTransport()
+    .request(`${base}/api/parties/${code}/leave`, { method: 'POST', headers: { Authorization: `Bearer ${held}` } })
     .then(() => undefined)
     .catch(() => undefined);
 }
@@ -338,10 +346,11 @@ function refuseIfRecentlyKicked(code: string): void {
 
 // ---- Controls (any member, unless the host has taken control) -------------------------------
 
-let socket: WebSocket | null = null;
+/** True while a socket the transport believes in is open. */
+let socketLive = false;
 
 function send(frame: Record<string, unknown>): void {
-  if (socket?.readyState === WebSocket.OPEN) socket.send(JSON.stringify(frame));
+  if (socketLive) partyTransport().send(JSON.stringify(frame));
 }
 
 function control(action: string, body: Record<string, unknown> = {}): void {
@@ -407,9 +416,8 @@ function clearTimers() {
 function disconnect(): void {
   loopId++;
   clearTimers();
-  const s = socket;
-  socket = null;
-  if (s && s.readyState <= WebSocket.OPEN) s.close(1000, 'left');
+  socketLive = false;
+  partyTransport().close();
 }
 
 /** Connect, pump frames until the socket goes, back off with jitter, go round again. */
@@ -423,37 +431,43 @@ function connect(): void {
     const { code } = useParty.getState();
     if (id !== loopId || !code || !token || !server) return;
     useParty.setState({ connection: 'connecting' });
-    const ws = new WebSocket(`${server.replace(/^http/, 'ws')}/ws/parties/${code}`, ['bitchord.v1', `bitchord.token.${token}`]);
-    socket = ws;
     let opened = false;
-    ws.onopen = () => {
-      if (id !== loopId) return;
-      opened = true;
-      failures = 0;
-      backoff = 1000;
-      useParty.setState({ connection: 'live', error: null });
-      // A burst on arrival makes the first seconds accurate, then a trickle keeps up with drift.
-      for (let i = 0; i < 4; i++) timers.push(setTimeout(ping, i * 300));
-      timers.push(setInterval(ping, PING_INTERVAL_MS) as unknown as ReturnType<typeof setTimeout>);
-      timers.push(setInterval(report, REPORT_INTERVAL_MS) as unknown as ReturnType<typeof setTimeout>);
-    };
-    ws.onmessage = (event) => {
-      if (id === loopId) onFrame(String(event.data));
-    };
-    ws.onclose = () => {
-      if (id !== loopId || socket !== ws) return;
-      socket = null;
-      clearTimers();
-      clock.reset();
-      useParty.setState({ connection: 'connecting', clockSynced: false });
-      if (!opened && ++failures >= CHECK_AFTER_FAILURES) {
-        failures = 0;
-        void checkMembership();
-      }
-      const wait = backoff / 2 + Math.random() * (backoff + 1);
-      backoff = Math.min(backoff * 2, 30_000);
-      timers.push(setTimeout(open, wait));
-    };
+    partyTransport().connect(
+      `${server.replace(/^http/, 'ws')}/ws/parties/${code}`,
+      token,
+      {
+        onOpen: () => {
+          if (id !== loopId) return;
+          opened = true;
+          socketLive = true;
+          failures = 0;
+          backoff = 1000;
+          useParty.setState({ connection: 'live', error: null });
+          // A burst on arrival makes the first seconds accurate, then a trickle keeps up with drift.
+          for (let i = 0; i < 4; i++) timers.push(setTimeout(ping, i * 300));
+          timers.push(setInterval(ping, PING_INTERVAL_MS) as unknown as ReturnType<typeof setTimeout>);
+          timers.push(setInterval(report, REPORT_INTERVAL_MS) as unknown as ReturnType<typeof setTimeout>);
+        },
+        onFrame: (text) => {
+          if (id === loopId) onFrame(text);
+        },
+        onClose: () => {
+          // A close from a socket a later connect already replaced is not ours.
+          if (id !== loopId) return;
+          socketLive = false;
+          clearTimers();
+          clock.reset();
+          useParty.setState({ connection: 'connecting', clockSynced: false });
+          if (!opened && ++failures >= CHECK_AFTER_FAILURES) {
+            failures = 0;
+            void checkMembership();
+          }
+          const wait = backoff / 2 + Math.random() * (backoff + 1);
+          backoff = Math.min(backoff * 2, 30_000);
+          timers.push(setTimeout(open, wait));
+        },
+      },
+    );
   };
   open();
 }
@@ -467,7 +481,9 @@ async function checkMembership(): Promise<void> {
   const { code } = useParty.getState();
   if (!code || !token || !server) return;
   try {
-    const response = await fetch(`${server}/api/parties/${code}`, { headers: { Authorization: `Bearer ${token}` } });
+    const response = await partyTransport().request(`${server}/api/parties/${code}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     if (response.status === 401 || response.status === 404) {
       const why = await errorOf(response);
       await leaveParty();
